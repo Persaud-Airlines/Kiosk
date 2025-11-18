@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Persaud Airlines Dashboard</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+  body {
+    margin: 0;
+    font-family: 'Helvetica Neue', Arial, sans-serif;
+    background: #0a3a6b;
+    color: white;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .fade {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeIn 0.7s ease forwards;
+  }
+  @keyframes fadeIn {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .pop {
+    animation: popIn 0.4s ease;
+  }
+  @keyframes popIn {
+    from { transform: scale(0.92); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  /* Top Bar */
+  #topbar {
+    background: black;
+    color: #ffff93;
+    padding: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: clamp(14px, 1.2vw, 20px);
+  }
+  #topbar div:first-child { font-weight: normal; }
+  #topbar div:nth-child(2) { font-weight: bold; }
+
+  /* Section Bar */
+  #sectionbar {
+    font-family: 'Lato', sans-serif;
+    background: black;
+    color: white;
+    padding: 10px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    font-size: clamp(14px,1vw,20px);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  #sectionbar div {
+    text-align: left;
+  }
+
+  /* Alignments + PILOT LOGBOOK moved 2 tabs back */
+  #sectionbar div:nth-child(1) { padding-left: 0rem; }
+  #sectionbar div:nth-child(2) {
+    padding-left: 0rem;
+    transform: translateX(-6rem);
+  }
+  #sectionbar div:nth-child(3) { padding-left: 4rem; }
+
+  .container {
+    display: grid;
+    grid-template-columns: 28% 40% 32%;
+    height: calc(100vh - 100px);
+    padding: 20px;
+    gap: 20px;
+  }
+
+  .col { display: flex; flex-direction: column; gap: 20px; }
+  .top-half { display: flex; flex-direction: column; gap: 15px; }
+
+  .box {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(6px);
+    border-radius: 6px;
+    padding: 20px;
+    border: 1px solid rgba(255,255,255,0.25);
+    font-size: clamp(13px,1vw,18px);
+  }
+
+  .weather { font-family: 'Roboto Mono', monospace; }
+
+  /* Subheaders (black bars) aligned perfectly */
+  .subheader {
+    background: black;
+    color: white;
+    padding: 10px 14px;
+    font-weight: bold;
+    margin: 0;
+    font-size: clamp(14px,1vw,18px);
+    display: flex;
+    align-items: center;
+    height: 48px;
+    font-family: 'Lato', sans-serif;
+  }
+
+  /* QOTD content no longer touches black bar */
+  .content-block {
+    flex: 1;
+    margin-top: 12px;
+  }
+
+  /* expands Pilot Hours so QOTD aligns with Subscriber Counter */
+  #pilot-hours {
+    min-height: 230px;
+  }
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 6px;
+  }
+</style>
+</head>
+
+<body>
+
+<div id="topbar" class="fade">
+  <div>Persaud Airlines · Niagara District Airport [CYSN]</div>
+  <div>Terminal 1 Aérogare</div>
+  <div id="clock">MM/DD/YYYY --:--:--</div>
+</div>
+
+<div id="sectionbar" class="fade">
+  <div>☁ WEATHER INFORMATION</div>
+  <div>📘 PILOT LOGBOOK</div>
+  <div>🎯 TODAY’S MISSIONS</div>
+</div>
+
+<div class="container fade">
+
+  <!-- LEFT COLUMN -->
+  <div class="col">
+    <div class="top-half">
+      <div class="box weather pop" id="metar">Loading METAR...</div>
+      <div class="box weather pop" id="taf">Loading TAF...</div>
+      <div class="box weather pop" id="notams">Loading NOTAMs...</div>
+      <div class="box weather pop" id="sigmets">Loading SIGMETS/AIRMETS...</div>
+    </div>
+
+    <div class="bottom-half">
+      <div class="subheader">👥 SUBSCRIBER COUNTER</div>
+      <div class="box content-block pop">SUB COUNTER</div>
+    </div>
+  </div>
+
+  <!-- MIDDLE COLUMN -->
+  <div class="col">
+    <div class="top-half">
+      <div class="box pop" id="pilot-hours">⏱ Pilot hours here</div>
+    </div>
+
+    <div class="bottom-half">
+      <div class="subheader">💬 QUOTE OF THE DAY</div>
+      <div class="box content-block pop" style="text-align:left;">
+        <span id="greeting"></span><br><br>
+        The Quote of the Day is:<br><br>
+        <span id="dailyquote">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div class="col" style="height:100%;">
+    <div class="box pop" style="padding:0; height: calc(100% + 2cm); width: calc(100% - 30px);">
+      <iframe src="https://twosapp.com"></iframe>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function updateClock() {
+  const now = new Date();
+  const mm = String(now.getMonth() + 1).padStart(2,'0');
+  const dd = String(now.getDate()).padStart(2,'0');
+  const yyyy = now.getFullYear();
+  const hh = String(now.getHours()).padStart(2,'0');
+  const min = String(now.getMinutes()).padStart(2,'0');
+  const ss = String(now.getSeconds()).padStart(2,'0');
+  document.getElementById("clock").textContent =
+    `${mm}/${dd}/${yyyy}   ${hh}:${min}:${ss}`;
+}
+setInterval(updateClock, 1000); 
+updateClock();
+
+const AVWX_KEY = "3XSq-UNpoGPuqn9sw_8KmWa2VcpRhUiiZgQaoH--0T8";
+const station = "CYSN";
+
+async function fetchMetar() {
+  try {
+    const res = await fetch(`https://avwx.rest/api/metar/${station}?token=${AVWX_KEY}`);
+    const data = await res.json();
+    document.getElementById("metar").textContent = data.raw || "No METAR available";
+  } catch { document.getElementById("metar").textContent = "Error fetching METAR"; }
+}
+
+async function fetchTaf() {
+  try {
+    const res = await fetch(`https://avwx.rest/api/taf/${station}?token=${AVWX_KEY}`);
+    const data = await res.json();
+    document.getElementById("taf").textContent = data.raw || "No TAF available";
+  } catch { document.getElementById("taf").textContent = "Error fetching TAF"; }
+}
+
+async function fetchNotams() {
+  try {
+    const res = await fetch(`https://avwx.rest/api/notam/${station}?token=${AVWX_KEY}`);
+    const data = await res.json();
+    document.getElementById("notams").textContent =
+      data.length ? data.map(n => n.raw).join("\n\n") : "No NOTAMs available";
+  } catch { document.getElementById("notams").textContent = "Error fetching NOTAMs"; }
+}
+
+async function fetchSigmets() {
+  try {
+    const res = await fetch(`https://avwx.rest/api/sigmet/${station}?token=${AVWX_KEY}`);
+    const data = await res.json();
+    document.getElementById("sigmets").textContent =
+      data.length ? data.map(s => s.raw).join("\n\n") : "No SIGMETs/AIRMETS available";
+  } catch { document.getElementById("sigmets").textContent = "Error fetching SIGMETs"; }
+}
+
+fetchMetar();
+fetchTaf();
+fetchNotams();
+fetchSigmets();
+
+function updateGreeting() {
+  const h = new Date().getHours();
+  let g = "Good Evening";
+  if (h < 12) g = "Good Morning";
+  else if (h < 17) g = "Good Afternoon";
+  else if (h < 21) g = "Good Evening";
+  else g = "Good Night";
+  document.getElementById("greeting").textContent = `${g} Captain Persaud`;
+}
+updateGreeting();
+
+async function loadQuote() {
+  try {
+    const res = await fetch("https://api.quotable.io/random");
+    const data = await res.json();
+    document.getElementById("dailyquote").textContent = data.content;
+  } catch {
+    document.getElementById("dailyquote").textContent = "Unable to load quote.";
+  }
+}
+loadQuote();
+</script>
+
+</body>
+</html>
