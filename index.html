@@ -261,6 +261,21 @@ async function loadQuote() {
   }
 }
 loadQuote();
+
+// Refresh exactly on the hour
+function scheduleHourlyRefresh() {
+  const now = new Date();
+  const msUntilNextHour =
+    (60 - now.getMinutes()) * 60 * 1000 -
+    now.getSeconds() * 1000 -
+    now.getMilliseconds();
+
+  setTimeout(() => {
+    location.reload();
+  }, msUntilNextHour);
+}
+
+scheduleHourlyRefresh();
 </script>
 
 </body>
