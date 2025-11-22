@@ -143,21 +143,36 @@
 
 <div class="container fade">
 
-  <!-- LEFT COLUMN -->
-  <div class="col">
-    <div class="top-half">
-      <div class="box weather pop" id="metar">Loading METAR...</div>
-      <div class="box weather pop" id="taf">Loading TAF...</div>
-      <div class="box weather pop" id="notams">Loading NOTAMs...</div>
-      <div class="box weather pop" id="sigmets">Loading SIGMETS/AIRMETS...</div>
+<!-- LEFT COLUMN -->
+<div class="col">
+  <div class="top-half">
+    <div class="box weather pop" id="metar">Loading METAR...</div>
+    <div class="box weather pop" id="taf">Loading TAF...</div>
+    <div class="box weather pop" id="notams">Loading NOTAMs...</div>
+    <div class="box weather pop" id="sigmets">Loading SIGMETS/AIRMETS...</div>
+  </div>
+
+  <div class="bottom-half">
+    <div class="subheader">👥 SUBSCRIBER COUNTER</div>
+
+    <div class="box content-block pop" style="padding:0; height:120px; overflow:hidden; position:relative;">
+      <iframe 
+        src="https://socialcounts.org/youtube-live-subscriber-count/UCBw8JOQFULdNz2pXmxFNIbg/embed?counter=0/1/2"
+        style="
+          position:absolute;
+          top:0;
+          left:0;
+          width:150%;         /* internal size */
+          height:150%;
+          transform: scale(0.75);  /* zoom level */
+          transform-origin: top left;
+          border:none;
+          border-radius:3px;
+        ">
+      </iframe>
     </div>
 
-    <div class="bottom-half">
-      <div class="subheader">👥 SUBSCRIBER COUNTER</div>
-      <div class="box content-block pop" style="padding:0; height:120px;">
-  <iframe src="https://socialcounts.org/youtube-live-subscriber-count/UCBw8JOQFULdNz2pXmxFNIbg/embed?counter=0/1/2" 
-          style="width:100%; height:250%; border:none; border-radius:3px; transform: scale(1.5); transform-origin: top left;">
-  </iframe>
+  </div>
 </div>
 
     </div>
