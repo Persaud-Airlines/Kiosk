@@ -174,23 +174,31 @@ iframe {
 
 <div class="container">
 
-  <!-- LEFT -->
-  <div class="col">
-    <div class="panel">
-      <div class="label">METAR</div>
-      <div class="data" id="metar">Loading…</div>
-    </div>
-
-    <div class="panel">
-      <div class="label">TAF</div>
-      <div class="data" id="taf">Loading…</div>
-    </div>
-
-    <div class="panel">
-      <div class="label">NOTAMS</div>
-      <div class="data" id="notams">Loading…</div>
-    </div>
+<!-- LEFT -->
+<div class="col">
+  <div class="panel">
+    <div class="label">METAR</div>
+    <div class="data" id="metar">Loading…</div>
   </div>
+
+  <div class="panel">
+    <div class="label">TAF</div>
+    <div class="data" id="taf">Loading…</div>
+  </div>
+
+  <div class="panel">
+    <div class="label">NOTAMS</div>
+    <div class="data" id="notams">Loading…</div>
+  </div>
+
+  <!-- CAMERA IFRAME -->
+  <div class="panel" style="height:1000px; padding:0;">
+    <iframe 
+      src="http://YOUR_CAMERA_IP_HERE" 
+      style="border:0; height:100%; width:100%;" 
+    ></iframe>
+  </div>
+</div>
 
   <!-- MIDDLE -->
   <div class="col">
