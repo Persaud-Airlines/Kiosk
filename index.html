@@ -26,22 +26,6 @@ body{
   overflow:hidden;
 }
 
-/* LOADER */
-#loader{
-  position:fixed; inset:0;
-  background:rgba(11,13,16,.95);
-  display:flex; align-items:center; justify-content:center;
-  z-index:9999;
-}
-.spinner{
-  width:60px;height:60px;
-  border:4px solid rgba(255,255,255,.1);
-  border-top:4px solid var(--accent);
-  border-radius:50%;
-  animation:spin 1s linear infinite;
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-
 /* TOP BAR */
 #topbar{
   height:60px;
@@ -143,7 +127,7 @@ body{
 
 /* ===== SCREEN 4 – LOGBOOK ===== */
 #logbook{
-  grid-template-columns:24% 76%; /* aircraft images thinner 3/4 */
+  grid-template-columns:24% 76%;
   gap:22px;
 }
 .aircraft-grid{
@@ -169,10 +153,6 @@ iframe,video{width:100%;height:100%;border:0;border-radius:14px}
 </head>
 
 <body>
-
-<div id="loader">
-  <div class="spinner"></div>
-</div>
 
 <div id="topbar">
   <div>Persaud Control</div>
@@ -221,8 +201,8 @@ iframe,video{width:100%;height:100%;border:0;border-radius:14px}
 <!-- SCREEN 3 – MAPS -->
 <div class="screen" id="maps">
   <div class="panel maps-stack">
-    <iframe src="https://maps.openrouteservice.org/#/directions/4883%20Cherry%20Avenue%20North,Lincoln,ON,Canada/5699%20King%20Street/data/..."></iframe>
-    <iframe src="https://maps.openrouteservice.org/#/directions/4883%20Cherry%20Avenue%20North,Lincoln,ON,Canada/Taxiway%20C,Niagara-on-the-Lake,ON,Canada/data/..."></iframe>
+    <iframe src="https://maps.openrouteservice.org/..."></iframe>
+    <iframe src="https://maps.openrouteservice.org/..."></iframe>
   </div>
 
   <div class="panel">
@@ -236,27 +216,27 @@ iframe,video{width:100%;height:100%;border:0;border-radius:14px}
     <div class="label">Aircraft</div>
     <div class="aircraft-grid">
       <div>
-        <img src="plane1.png">
+        <img src="https://github.com/Persaud-Airlines/Kiosk/blob/main/FVS.jpg?raw=true">
         <div class="caption">C-GFVS - Cessna 172</div>
       </div>
       <div>
-        <img src="plane2.png">
+        <img src="https://github.com/Persaud-Airlines/Kiosk/blob/main/NOP.jpg?raw=true">
         <div class="caption">C-GNOP - Piper Warrior II</div>
       </div>
       <div>
-        <img src="plane3.png">
+        <img src="https://github.com/Persaud-Airlines/Kiosk/blob/main/YGZ.jpg?raw=true">
         <div class="caption">C-GYGZ - Piper Warrior II</div>
       </div>
       <div>
-        <img src="plane4.png">
+        <img src="https://github.com/Persaud-Airlines/Kiosk/blob/main/GQC.webp?raw=true">
         <div class="caption">C-GGQC - Piper Warrior II</div>
       </div>
       <div>
-        <img src="plane5.png">
+        <img src="https://github.com/Persaud-Airlines/Kiosk/blob/main/NOC.jpg?raw=true">
         <div class="caption">C-GNOC - Piper Warrior II</div>
       </div>
       <div>
-        <img src="plane6.png">
+        <img src="https://github.com/Persaud-Airlines/Kiosk/blob/main/GYZ.jpg?raw=true">
         <div class="caption">C-GGYZ - Cessna 172</div>
       </div>
     </div>
@@ -304,22 +284,26 @@ iframe,video{width:100%;height:100%;border:0;border-radius:14px}
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // Loader + Clock
-  setTimeout(()=>loader.style.display='none',3500)
-  setInterval(()=>clock.textContent=new Date().toLocaleTimeString(),1000)
+  // CLOCK
+  setInterval(() => clock.textContent = new Date().toLocaleTimeString(), 1000);
 
-  // Screen rotation
-  const screens=[...document.querySelectorAll('.screen')];
-  let i=0;
-  setInterval(()=>{
+  // SCREEN ROTATION
+  const screens = [...document.querySelectorAll('.screen')];
+  let i = 0;
+  const screenInterval = setInterval(() => {
     screens[i].classList.remove('active');
-    i=(i+1)%screens.length;
+    i++;
+    if(i >= screens.length){
+      clearInterval(screenInterval);
+      location.reload(); // refresh after 4th screen
+      return;
+    }
     screens[i].classList.add('active');
-  },7500);
+  }, 7500);
 
   // WEATHER – AVWX
-  const AVWX_KEY="3XSq-UNpoGPuqn9sw_8KmWa2VcpRhUiiZgQaoH--0T8"
-  const STATION="CYSN"
+  const AVWX_KEY="3XSq-UNpoGPuqn9sw_8KmWa2VcpRhUiiZgQaoH--0T8";
+  const STATION="CYSN";
   async function load(type,id){
     try{
       const r=await fetch(`https://avwx.rest/api/${type}/${STATION}?token=${AVWX_KEY}`)
@@ -330,23 +314,14 @@ iframe,video{width:100%;height:100%;border:0;border-radius:14px}
       document.getElementById(id).textContent="Error loading data"
     }
   }
-  load("metar","metar")
-  load("taf","taf")
-  load("notam","notams")
-  load("airmet","airmet")
-  load("sigmet","sigmet")
+  ["metar","taf","notams","airmet","sigmet"].forEach(id=>load(id,id));
   setInterval(()=>{
-    load("metar","metar")
-    load("taf","taf")
-    load("notam","notams")
-    load("airmet","airmet")
-    load("sigmet","sigmet")
-  },600000)
+    ["metar","taf","notams","airmet","sigmet"].forEach(id=>load(id,id));
+  },600000);
 
   // FIRESTORE LOGBOOK SYNC
   const tbody = document.querySelector("#logbook-table tbody");
   const q = query(collection(db, "logbook"), orderBy("date","desc"));
-
   onSnapshot(q, snap => {
     tbody.innerHTML = "";
     snap.forEach(doc => {
