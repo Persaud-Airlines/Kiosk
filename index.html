@@ -5,303 +5,364 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Persaud Control</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=JetBrains+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono&display=swap" rel="stylesheet">
 
 <style>
-:root {
-  --bg: #0b0d10;
-  --panel: rgba(255,255,255,0.06);
-  --panel-strong: rgba(255,255,255,0.1);
-  --accent: #c9a86a;
-  --text: #f5f7fa;
-  --muted: #9aa0a6;
+:root{
+  --bg:#0b0d10;
+  --panel:rgba(255,255,255,.06);
+  --panel-strong:rgba(255,255,255,.1);
+  --accent:#c9a86a;
+  --text:#f5f7fa;
+  --muted:#9aa0a6;
 }
-
-/* BODY */
-body {
-  margin: 0;
-  height: 100vh;
-  background: radial-gradient(1200px 600px at top, #111827, #0b0d10);
-  color: var(--text);
-  font-family: Inter, system-ui, sans-serif;
-  overflow: hidden;
+*{box-sizing:border-box}
+body{
+  margin:0;
+  height:100vh;
+  background:radial-gradient(1200px 600px at top,#111827,#0b0d10);
+  color:var(--text);
+  font-family:Inter,system-ui,sans-serif;
+  overflow:hidden;
 }
 
 /* LOADER */
-#loader {
-  position: fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background: rgba(11,13,16,0.95);
-  display:flex;
-  justify-content:center;
-  align-items:center;
+#loader{
+  position:fixed; inset:0;
+  background:rgba(11,13,16,.95);
+  display:flex; align-items:center; justify-content:center;
   z-index:9999;
-  opacity:1;
-  transition: opacity 1s ease;
 }
-
-.loader-box {
-  text-align:center;
-  background: rgba(255,255,255,0.05);
-  padding:40px;
-  border-radius:20px;
-  backdrop-filter: blur(14px);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+.spinner{
+  width:60px;height:60px;
+  border:4px solid rgba(255,255,255,.1);
+  border-top:4px solid var(--accent);
+  border-radius:50%;
+  animation:spin 1s linear infinite;
 }
-
-.spinner {
-  border: 4px solid rgba(255,255,255,0.1);
-  border-top: 4px solid #c9a86a;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  margin:0 auto 15px auto;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg);}
-  100% { transform: rotate(360deg);}
-}
-
-.loader-text {
-  font-family: Inter, sans-serif;
-  font-size: 16px;
-  color: #c9a86a;
-  letter-spacing: 1px;
-}
+@keyframes spin{to{transform:rotate(360deg)}}
 
 /* TOP BAR */
-#topbar {
-  height: 60px;
-  background: rgba(0,0,0,0.85);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+#topbar{
+  height:60px;
+  background:rgba(0,0,0,.85);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+}
+#clock{font-family:"JetBrains Mono";color:var(--accent)}
+
+/* SCREEN */
+.screen{
+  position:absolute;
+  inset:60px 0 0 0;
+  padding:24px;
+  display:none;
+}
+.screen.active{display:grid}
+
+/* COMMON */
+.panel{
+  background:linear-gradient(180deg,var(--panel-strong),var(--panel));
+  border-radius:16px;
+  padding:18px;
+  backdrop-filter:blur(16px);
+  box-shadow:0 10px 30px rgba(0,0,0,.35);
+}
+.label{
+  font-size:11px;
+  letter-spacing:.15em;
+  text-transform:uppercase;
+  color:var(--accent);
+  margin-bottom:6px;
+}
+.data{
+  font-family:"JetBrains Mono";
+  font-size:13px;
+  color:var(--muted);
+  white-space:pre-wrap;
+  overflow:auto;
 }
 
-#clock {
-  font-family: "JetBrains Mono", monospace;
-  color: var(--accent);
+/* ===== SCREEN 1 – WELCOME ===== */
+#welcome{grid-template-rows:1fr}
+.welcome-panel{position:relative;height:100%}
+.welcome-title{
+  position:absolute;
+  top:20px;left:24px;
+  font-size:42px;
+  font-weight:800;
+  color:var(--accent);
+}
+.welcome-title span{
+  display:block;
+  font-size:28px;
+  font-weight:600;
+  color:var(--muted);
+}
+.welcome-center{
+  height:100%;
+  display:grid;
+  grid-template-columns:1fr auto 1fr;
+  align-items:center;
+  text-align:center;
+  font-size:64px;
+  font-weight:700;
+}
+.welcome-plane{font-size:96px}
+
+/* ===== SCREEN 2 – OPS ===== */
+#ops{
+  grid-template-columns:400px 1fr 600px; /* TWOS wider, weather thinner, camera adjusted */
+  gap:22px;
+}
+.ops-weather{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.sub-counter{
+  height:80px;
+  margin-top:auto;
+  overflow:hidden;
 }
 
-/* LAYOUT */
-.container {
-  display: grid;
-  grid-template-columns: 28% 36% 36%;
-  gap: 22px;
-  padding: 24px;
-  height: calc(100vh - 60px - 24px);
-  box-sizing: border-box;
-  opacity:0; /* hidden initially, fade in after loader */
-  transition: opacity 1s ease;
+/* ===== SCREEN 3 – MAPS ===== */
+#maps{
+  grid-template-columns:28% 72%;
+  gap:22px;
 }
+.maps-stack{
+  display:flex;
+  flex-direction:column;
+  height:100%;
+  gap:12px;
+}
+.maps-stack iframe{flex:1}
 
-.col {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  min-height: 0;
+/* ===== SCREEN 4 – LOGBOOK ===== */
+#logbook{
+  grid-template-columns:24% 76%; /* aircraft images thinner 3/4 */
+  gap:22px;
 }
+.aircraft-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:12px;
+}
+.aircraft-grid img{
+  width:75%;
+  display:block;
+  margin:auto;
+  border-radius:12px;
+}
+.caption{
+  text-align:center;
+  font-size:12px;
+  color:var(--muted);
+}
+.log-table{height:100%;overflow:auto}
 
-/* PANELS */
-.panel {
-  background: linear-gradient(180deg, var(--panel-strong), var(--panel));
-  border-radius: 16px;
-  padding: 18px;
-  backdrop-filter: blur(16px);
-  box-shadow:
-    0 10px 30px rgba(0,0,0,0.35),
-    inset 0 1px 0 rgba(255,255,255,0.05);
-  min-height: 0;
-}
-
-.label {
-  font-size: 11px;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 10px;
-}
-
-.data {
-  font-family: "JetBrains Mono", monospace;
-  font-size: 13px;
-  color: var(--muted);
-  white-space: pre-wrap;
-  overflow-y: auto;
-  min-height: 0;
-}
-
-/* IFRAME */
-iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  border-radius: 14px;
-}
-
-/* SCROLLBAR */
-.data::-webkit-scrollbar {
-  width: 6px;
-}
-.data::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.15);
-  border-radius: 6px;
-}
+iframe,video{width:100%;height:100%;border:0;border-radius:14px}
 </style>
 </head>
 
 <body>
 
-<!-- LOADER -->
 <div id="loader">
-  <div class="loader-box">
-    <div class="spinner"></div>
-    <div class="loader-text">Loading Persaud Control…</div>
-  </div>
+  <div class="spinner"></div>
 </div>
 
 <div id="topbar">
   <div>Persaud Control</div>
-  <div id="clock">--:--:--</div>
+  <div id="clock"></div>
 </div>
 
-<div class="container">
-
-<!-- LEFT -->
-<div class="col">
-  <div class="panel">
-    <div class="label">METAR</div>
-    <div class="data" id="metar">Loading…</div>
-  </div>
-
-  <div class="panel">
-    <div class="label">TAF</div>
-    <div class="data" id="taf">Loading…</div>
-  </div>
-
-  <div class="panel">
-    <div class="label">NOTAMS</div>
-    <div class="data" id="notams">Loading…</div>
-  </div>
-
-  <!-- CAMERA IFRAME -->
-  <div class="panel" style="height:1000px; padding:0;">
-    <iframe 
-      src="http://YOUR_CAMERA_IP_HERE" 
-      style="border:0; height:100%; width:100%;" 
-    ></iframe>
+<!-- SCREEN 1 -->
+<div class="screen active" id="welcome">
+  <div class="panel welcome-panel">
+    <div class="welcome-title">
+      Welcome Onboard
+      <span>Bienvenue à bord</span>
+    </div>
+    <div class="welcome-center">
+      <div>Ready to Fly</div>
+      <div class="welcome-plane">✈</div>
+      <div>Prêt à voler</div>
+    </div>
   </div>
 </div>
 
-  <!-- MIDDLE -->
-  <div class="col">
-    <div class="panel" style="padding:0; height:160px; overflow:hidden;">
-      <iframe
-        src="https://socialcounts.org/youtube-live-subscriber-count/UCBw8JOQFULdNz2pXmxFNIbg/embed?counter=0/1/2"
-        style="transform: scale(1.35); transform-origin: top left;">
-      </iframe>
-    </div>
+<!-- SCREEN 2 – OPS -->
+<div class="screen" id="ops">
+  <div class="panel">
+    <iframe src="https://twosapp.com"></iframe>
+  </div>
 
-    <!-- TWO MAPS -->
-    <div class="panel" style="flex:1; padding:0; display:flex; flex-direction:column; gap:12px;">
-      <iframe
-        id="map1"
-        style="border:0; flex:1;"
-        src="https://maps.openrouteservice.org/#/directions/4883%20Cherry%20Avenue%20North,Lincoln,ON,Canada/5699%20King%20Street/data/55,130,32,198,15,97,4,224,38,9,96,59,2,24,5,192,166,6,113,0,184,64,90,1,216,4,224,14,128,22,1,24,5,96,25,154,227,206,48,128,25,93,182,128,105,205,180,203,140,171,69,139,98,0,57,139,87,34,64,19,0,54,0,220,68,203,84,169,84,108,186,133,11,147,153,86,119,94,107,234,137,42,176,164,173,33,56,128,128,1,213,60,8,137,176,229,0,11,202,0,91,92,123,174,222,129,0,6,111,0,3,110,139,130,11,13,15,0,6,228,128,14,111,134,12,141,5,98,15,238,136,30,141,14,136,134,14,23,131,153,9,233,235,155,14,139,6,153,236,128,1,239,9,224,10,233,224,15,169,139,110,129,83,236,32,11,237,212,0,0"
-        allowfullscreen
-      ></iframe>
-      <iframe
-        id="map2"
-        style="border:0; flex:1;"
-        src="https://maps.openrouteservice.org/#/directions/4883%20Cherry%20Avenue%20North,Lincoln,ON,Canada/Taxiway%20C,Niagara-on-the-Lake,ON,Canada/data/55,130,32,198,15,97,4,224,38,9,96,59,2,24,5,192,166,6,113,0,184,64,90,1,216,4,224,14,128,22,1,24,5,96,25,154,227,206,48,128,25,93,182,128,105,205,180,203,140,171,69,139,98,0,57,139,87,34,64,19,0,54,0,220,68,202,85,106,37,96,217,133,103,148,157,215,165,81,227,71,85,146,220,139,89,178,87,81,9,196,4,0,14,169,224,68,77,135,40,0,94,80,2,218,228,169,71,96,237,1,0,6,111,0,3,110,139,130,11,13,15,0,6,228,128,14,111,134,12,141,11,98,12,30,138,30,141,14,136,134,13,23,128,89,3,227,232,91,14,139,5,147,236,128,1,239,3,224,10,227,224,15,169,128,238,131,95,236,32,11,239,212,0,0"
-        allowfullscreen
-      ></iframe>
+  <div class="panel ops-weather">
+    <div class="label">METAR</div><div class="data" id="metar">Loading…</div>
+    <div class="label">TAF</div><div class="data" id="taf">Loading…</div>
+    <div class="label">NOTAMS</div><div class="data" id="notams">Loading…</div>
+    <div class="label">AIRMET</div><div class="data" id="airmet">Loading…</div>
+    <div class="label">SIGMET</div><div class="data" id="sigmet">Loading…</div>
+
+    <div class="label">SUBSCRIBERS</div>
+    <div class="sub-counter">
+      <iframe src="https://socialcounts.org/youtube-live-subscriber-count/UCBw8JOQFULdNz2pXmxFNIbg/embed"></iframe>
     </div>
   </div>
 
-  <!-- RIGHT -->
-  <div class="col">
-    <div class="panel" style="flex:1; padding:0;">
-      <iframe src="https://twosapp.com"></iframe>
-    </div>
+  <div class="panel">
+    <iframe src="http://YOUR_CAMERA_IP_HERE"></iframe>
   </div>
-
 </div>
 
-<script>
-/* LUXURY LOADER */
-setTimeout(() => {
-  const loader = document.getElementById('loader');
-  loader.style.opacity = '0';
-  setTimeout(() => loader.style.display = 'none', 1000);
-  document.querySelector('.container').style.opacity = '1';
-}, 5000);
+<!-- SCREEN 3 – MAPS -->
+<div class="screen" id="maps">
+  <div class="panel maps-stack">
+    <iframe src="https://maps.openrouteservice.org/#/directions/4883%20Cherry%20Avenue%20North,Lincoln,ON,Canada/5699%20King%20Street/data/..."></iframe>
+    <iframe src="https://maps.openrouteservice.org/#/directions/4883%20Cherry%20Avenue%20North,Lincoln,ON,Canada/Taxiway%20C,Niagara-on-the-Lake,ON,Canada/data/..."></iframe>
+  </div>
 
-/* CLOCK */
-setInterval(() => {
-  document.getElementById("clock").textContent =
-    new Date().toLocaleTimeString();
-}, 1000);
+  <div class="panel">
+    <video src="VIDEO_RAW_GITHUB_URL" autoplay muted loop></video>
+  </div>
+</div>
 
-/* WEATHER */
-const AVWX_KEY = "3XSq-UNpoGPuqn9sw_8KmWa2VcpRhUiiZgQaoH--0T8";
-const STATION = "CYSN";
+<!-- SCREEN 4 – LOGBOOK -->
+<div class="screen" id="logbook">
+  <div class="panel">
+    <div class="label">Aircraft</div>
+    <div class="aircraft-grid">
+      <div>
+        <img src="plane1.png">
+        <div class="caption">C-GFVS - Cessna 172</div>
+      </div>
+      <div>
+        <img src="plane2.png">
+        <div class="caption">C-GNOP - Piper Warrior II</div>
+      </div>
+      <div>
+        <img src="plane3.png">
+        <div class="caption">C-GYGZ - Piper Warrior II</div>
+      </div>
+      <div>
+        <img src="plane4.png">
+        <div class="caption">C-GGQC - Piper Warrior II</div>
+      </div>
+      <div>
+        <img src="plane5.png">
+        <div class="caption">C-GNOC - Piper Warrior II</div>
+      </div>
+      <div>
+        <img src="plane6.png">
+        <div class="caption">C-GGYZ - Cessna 172</div>
+      </div>
+    </div>
+  </div>
 
-async function load(type, el) {
-  try {
-    const r = await fetch(`https://avwx.rest/api/${type}/${STATION}?token=${AVWX_KEY}`);
-    const d = await r.json();
-    document.getElementById(el).textContent =
-      Array.isArray(d) ? d.map(x => x.raw).join("\n\n") : d.raw;
-  } catch {
-    document.getElementById(el).textContent = "Error loading data";
+  <div class="panel log-table">
+    <div class="label">Logbook</div>
+    <table id="logbook-table" style="width:100%;font-family:JetBrains Mono;font-size:13px">
+      <thead>
+        <tr>
+          <th>DATE</th>
+          <th>AIRCRAFT</th>
+          <th>TAIL</th>
+          <th>MISSION</th>
+          <th>DUAL</th>
+          <th>SOLO</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- FIREBASE + SCRIPT -->
+<script type="module">
+  // Firebase App
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    query,
+    orderBy,
+    onSnapshot
+  } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBCwsqmzDMe8tVn-4Sxd7mOt18dAZagtgY",
+    authDomain: "kiosk-dfb78.firebaseapp.com",
+    projectId: "kiosk-dfb78",
+    storageBucket: "kiosk-dfb78.appspot.com",
+    messagingSenderId: "200641254935",
+    appId: "1:200641254935:web:5016637e01700f4ce22e52"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Loader + Clock
+  setTimeout(()=>loader.style.display='none',3500)
+  setInterval(()=>clock.textContent=new Date().toLocaleTimeString(),1000)
+
+  // Screen rotation
+  const screens=[...document.querySelectorAll('.screen')];
+  let i=0;
+  setInterval(()=>{
+    screens[i].classList.remove('active');
+    i=(i+1)%screens.length;
+    screens[i].classList.add('active');
+  },7500);
+
+  // WEATHER – AVWX
+  const AVWX_KEY="3XSq-UNpoGPuqn9sw_8KmWa2VcpRhUiiZgQaoH--0T8"
+  const STATION="CYSN"
+  async function load(type,id){
+    try{
+      const r=await fetch(`https://avwx.rest/api/${type}/${STATION}?token=${AVWX_KEY}`)
+      const d=await r.json()
+      document.getElementById(id).textContent =
+        Array.isArray(d)?d.map(x=>x.raw).join("\n\n"):d.raw
+    }catch{
+      document.getElementById(id).textContent="Error loading data"
+    }
   }
-}
+  load("metar","metar")
+  load("taf","taf")
+  load("notam","notams")
+  load("airmet","airmet")
+  load("sigmet","sigmet")
+  setInterval(()=>{
+    load("metar","metar")
+    load("taf","taf")
+    load("notam","notams")
+    load("airmet","airmet")
+    load("sigmet","sigmet")
+  },600000)
 
-load("metar","metar");
-load("taf","taf");
-load("notam","notams");
+  // FIRESTORE LOGBOOK SYNC
+  const tbody = document.querySelector("#logbook-table tbody");
+  const q = query(collection(db, "logbook"), orderBy("date","desc"));
 
-setInterval(() => {
-  load("metar","metar");
-  load("taf","taf");
-  load("notam","notams");
-}, 600000);
-
-/* SCHEDULE REFRESH AT :20 OF EACH HOUR */
-function scheduleHourlyRefreshAt20() {
-  const now = new Date();
-  const nextHour20 = new Date(
-    now.getFullYear(),
-    now.getMonth(),
-    now.getDate(),
-    now.getHours(),
-    20, // minutes
-    0,  // seconds
-    0   // milliseconds
-  );
-
-  // If we're past :20 this hour, schedule for next hour
-  if (now.getMinutes() >= 20) {
-    nextHour20.setHours(nextHour20.getHours() + 1);
-  }
-
-  const msUntilNext = nextHour20 - now;
-
-  setTimeout(() => {
-    location.reload();
-  }, msUntilNext);
-}
-
-// Start the schedule
-scheduleHourlyRefreshAt20();
+  onSnapshot(q, snap => {
+    tbody.innerHTML = "";
+    snap.forEach(doc => {
+      const d = doc.data();
+      tbody.innerHTML += `
+        <tr>
+          <td>${d.date}</td>
+          <td>${d.aircraft}</td>
+          <td>${d.tail}</td>
+          <td>${d.mission}</td>
+          <td>${d.dual || 0}</td>
+          <td>${d.solo || 0}</td>
+        </tr>
+      `;
+    });
+  });
 </script>
 
 </body>
